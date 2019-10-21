@@ -9,7 +9,7 @@ def get_histogram(image, bins=256):
     color = ('b','g','r')
     hist_dict = {'r': [], 'g': [], 'b': []}
     for channel, col in enumerate(color):
-        hist = cv2.calcHist([img],[channel],None,[bins],[0,bins])
+        hist = cv2.calcHist([image],[channel],None,[bins],[0,bins])
         hist_dict[color].extend(hist)
     return hist_dict
 
