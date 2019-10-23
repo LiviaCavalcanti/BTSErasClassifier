@@ -1,7 +1,6 @@
 import cv2
 import os
 
-
 SAMPLE_FOLDER = "../sample_images" # if you can't find images, try run this file in analysis folder
 
 def get_histogram(image, bins=256):
@@ -10,7 +9,7 @@ def get_histogram(image, bins=256):
     hist_dict = {'r': [], 'g': [], 'b': []}
     for channel, col in enumerate(color):
         hist = cv2.calcHist([image],[channel],None,[bins],[0,bins])
-        hist_dict[color].extend(hist)
+        hist_dict[col].extend(hist.reshape(-1))
     return hist_dict
 
 # get the file names from a folder
