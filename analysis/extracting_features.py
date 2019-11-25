@@ -99,7 +99,7 @@ def extract_feature(img_name):
     moment = fd_hu_moments(img)
     hara = fd_haralick(img)
 
-    return str(hist)+";"+ str(moment)+";"+ str(hara)
+    return str(hist)+";"+ str(list(moment))+";"+ str(list(hara))
 
 # separate IMG_FOLDER images between train and test .csv
 create_train_test(IMG_FOLDER)
