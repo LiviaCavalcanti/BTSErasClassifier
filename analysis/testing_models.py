@@ -1,38 +1,53 @@
 import pandas
 import cv2
-from sklearn import svm, preprocessing
+from sklearn.svm import SVC
 import numpy as np
 import ast
 
 TRAIN_FEATURES_FILE="trainFeatures.csv"
+TEST_FEATURES_FILE="testFeatures.csv"
+LABELS = {"2_cool_4_school":0,"dark_n_wild":1,"hwayangyeonhwa-pt1":10,"hwayangyeonhwa-pt2":2,"love yourself tear":3,"map of the soul":4,"o_rul8_2":5,"skool_luv_affair":6,"wings":7,"you never walk alone":8,"young_forever":9}
 
-clf =svm.SVC(random_state=9)
-features = []
+def read_data(file_name):
+    features = []
+    labels = []
 
-with open(TRAIN_FEATURES_FILE, "r") as f:
-    line = f.readline()
-    while(line):
-        # features.append(ast.literal_eval(line.split(";")[:-1]))
-        file_line = line.split(";")[:-1]
-        true_features = []
-        for i in file_line:
-            temp = ast.literal_eval(i)
-            
-            if isinstance(temp, dict):
-                print("+++++++++++++++++++++++++")
-                true_features.extend(list(temp.values()))
-            else:
-                true_features.append(temp)
-        
-        features.append(true_features)
+    with open(file_name, "r") as f:
         line = f.readline()
-f.close()
+        while(line):
+            file_line = line.split(";")
+            l, file_line = file_line[-1], file_line[:-1]
+            true_features = []
 
-print("------------------------------")
-# global_feature = np.hstack(features)
-# scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-# #Normalize The feature vectors...
-# rescaled_features = scaler.fit_transform(global_feature)
-# print(":::::::::::::::::::::::::::::::::::::")
-prediction= clf.fit(features)[0]
-print(prediction)
+            for i in file_line:
+                temp = ast.literal_eval(i)
+                if isinstance(temp, dict):
+
+                    true_features.extend(list(temp.values())[0])
+            
+            features.append(true_features)
+            labels.append(LABELS[l[:-1]])
+            
+            line = f.readline()
+    f.close()
+    return np.array(features), np.array(labels)
+
+
+
+X_train, y_train = read_data(TRAIN_FEATURES_FILE)
+X_test, y_test = read_data(TEST_FEATURES_FILE)
+
+
+clf = SVC(random_state=7,gamma='scale', decision_function_shape='ovo')
+clf.fit(X_train, y_train)
+
+y_ = clf.predict(X_test)
+print("accuracy: ", (sum(y_test==y_))/len(y_))
+
+# a= y_test==y_
+# for i in range(len(y_)):
+#     print(y_[i], y_test[i])
+
+# accuracy:  0.23809523809523808 2
+# accuracy:  0.20952380952380953 1
+# accuracy:  0.44761904761904764 0
