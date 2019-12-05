@@ -12,6 +12,8 @@ TEST_FEATURES_FILE="testFeatures.csv"
 TRAIN_FEATURES_FILE="trainFeatures.csv"
 TEST_FOLDER="test/"
 TRAIN_FOLDER="train/"
+TEST_PATH = IMG_FOLDER + "/" + TEST_FOLDER
+TRAIN_PATH = IMG_FOLDER + "/" + TRAIN_FOLDER
 
 def get_histogram(image, bins=256):
     r''' returns a dict with histogram per channel of an image '''
@@ -38,6 +40,7 @@ def create_train_test(folder_name):
     video_filename = []
 
     # create these files before run
+
     f = open(TRAIN_NAMES, "a")
     f_test = open(TEST_NAMES, "a")
     for (dirpath, dirnames, filename) in os.walk(folder_name):
@@ -56,12 +59,12 @@ def create_train_test(folder_name):
     f_test.close()
 
 def split_data():
-    test_path = IMG_FOLDER + "/" + TEST_FOLDER
-    train_path = IMG_FOLDER + "/" + TRAIN_FOLDER
+
+    
     test_feactures = open(TEST_FEATURES_FILE, "a")
     train_feactures = open(TRAIN_FEATURES_FILE, "a")
-    os.mkdir(test_path)
-    os.mkdir(train_path)
+    os.mkdir(TEST_PATH)
+    os.mkdir(TRAIN_PATH)
 
     with open(TRAIN_NAMES, "r") as f:
         line = f.readline()
@@ -70,7 +73,7 @@ def split_data():
             folder_name = folder_name[:-1] # remove '\n'
             img_path = IMG_FOLDER + "/" + folder_name + "/" + img_name
             train_feactures.write(extract_feature(img_path)+";"+folder_name+"\n")
-            destination = train_path + folder_name
+            destination = TRAIN_PATH + folder_name
             if not os.path.exists(destination):
                 os.mkdir(destination)
                 
@@ -85,7 +88,7 @@ def split_data():
             folder_name = folder_name[:-1]
             img_path = IMG_FOLDER + "/" + folder_name + "/" + img_name
             test_feactures.write(extract_feature(img_path)+";"+folder_name+"\n")
-            destination = test_path + folder_name
+            destination = TEST_PATH + folder_name
             if not os.path.exists(destination):
                 os.mkdir(destination)
                 
@@ -95,12 +98,28 @@ def split_data():
 
 def extract_feature(img_name):
     img = cv2.imread(img_name)
+    img = cv2.resize(img,(720,480))
     hist = get_histogram(img)
     moment = fd_hu_moments(img)
     hara = fd_haralick(img)
 
     return str(hist)+";"+ str(list(moment))+";"+ str(list(hara))
 
+
+
+# deleting files from previous executions
+if os.path.isfile(TEST_FEATURES_FILE):
+    os.remove(TEST_FEATURES_FILE)
+if os.path.isfile(TRAIN_FEATURES_FILE):
+    os.remove(TRAIN_FEATURES_FILE)
+if os.path.exists(TEST_PATH):
+    shutil.rmtree(TEST_PATH)
+if os.path.exists(TRAIN_PATH):
+    shutil.rmtree(TRAIN_PATH)
+if os.path.isfile(TEST_NAMES):
+    os.remove(TEST_NAMES)
+if os.path.isfile(TRAIN_NAMES):
+    os.remove(TRAIN_NAMES)
 # separate IMG_FOLDER images between train and test .csv
 create_train_test(IMG_FOLDER)
 
