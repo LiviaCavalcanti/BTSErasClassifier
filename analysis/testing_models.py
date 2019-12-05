@@ -3,10 +3,11 @@ import cv2
 from sklearn.svm import SVC
 import numpy as np
 import ast
+from sklearn.metrics import confusion_matrix
 
 TRAIN_FEATURES_FILE="trainFeatures.csv"
 TEST_FEATURES_FILE="testFeatures.csv"
-LABELS = {"2_cool_4_school":0,"dark_n_wild":1,"hwayangyeonhwa-pt1":10,"hwayangyeonhwa-pt2":2,"love yourself tear":3,"map of the soul":4,"o_rul8_2":5,"skool_luv_affair":6,"wings":7,"you never walk alone":8,"young_forever":9}
+LABELS = {"2_cool_4_school":0,"dark_n_wild":1,"hwayangyeonhwa-pt1":10,"hwayangyeonhwa-pt2":2,"love yourself tear":3,"map of the soul persona":4,"o_rul8_2":5,"skool_luv_affair":6,"wings":7,"you never walk alone":8,"young_forever":9, "love yourself her":11, "love yourself answer":12}
 
 def read_data(file_name):
     features = []
@@ -24,7 +25,7 @@ def read_data(file_name):
                 if isinstance(temp, dict):
 
                     true_features.extend(list(temp.values())[0])
-            
+             
             features.append(true_features)
             labels.append(LABELS[l[:-1]])
             
@@ -42,12 +43,6 @@ clf = SVC(random_state=7,gamma='scale', decision_function_shape='ovo')
 clf.fit(X_train, y_train)
 
 y_ = clf.predict(X_test)
+
+print(confusion_matrix(y_test, y_, list(LABELS.values())))
 print("accuracy: ", (sum(y_test==y_))/len(y_))
-
-# a= y_test==y_
-# for i in range(len(y_)):
-#     print(y_[i], y_test[i])
-
-# accuracy:  0.23809523809523808 2
-# accuracy:  0.20952380952380953 1
-# accuracy:  0.44761904761904764 0
