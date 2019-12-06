@@ -14,6 +14,9 @@ TEST_FOLDER="test/"
 TRAIN_FOLDER="train/"
 TEST_PATH = IMG_FOLDER + "/" + TEST_FOLDER
 TRAIN_PATH = IMG_FOLDER + "/" + TRAIN_FOLDER
+VAL_IMG_PATH = "../projeto/"
+VAL_IMG_NAME = "validation.csv"
+
 
 def get_histogram(image, bins=256):
     r''' returns a dict with histogram per channel of an image '''
@@ -22,7 +25,7 @@ def get_histogram(image, bins=256):
     for channel, col in enumerate(color):
         hist = cv2.calcHist([image],[channel],None,[bins],[0,bins])
         hist_dict[col].extend(hist.reshape(-1))
-    return hist_dict
+    return dict(hist_dict)
 
 def fd_hu_moments(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -103,25 +106,46 @@ def extract_feature(img_name):
     moment = fd_hu_moments(img)
     hara = fd_haralick(img)
 
-    return str(hist)+";"+ str(list(moment))+";"+ str(list(hara))
+    return str(hist) +";"+ str(list(moment))+";"+ str(list(hara))
+
+def create_validation_set():
+    validation = open(VAL_IMG_NAME, "a")
+    dirnames = os.listdir(VAL_IMG_PATH)
+
+    for folder in dirnames:
+        path = VAL_IMG_PATH + folder
+        for filename in os.listdir(path):
+            features = extract_feature(path + '/' + filename)
+            validation.write(features+";"+folder+"\n")
+
+    validation.close()
+
+def del_files():
+    # deleting files from previous executions
+    if os.path.isfile(TEST_FEATURES_FILE):
+        os.remove(TEST_FEATURES_FILE)
+    if os.path.isfile(TRAIN_FEATURES_FILE):
+        os.remove(TRAIN_FEATURES_FILE)
+    if os.path.exists(TEST_PATH):
+        shutil.rmtree(TEST_PATH)
+    if os.path.exists(TRAIN_PATH):
+        shutil.rmtree(TRAIN_PATH)
+    if os.path.isfile(TEST_NAMES):
+        os.remove(TEST_NAMES)
+    if os.path.isfile(TRAIN_NAMES):
+        os.remove(TRAIN_NAMES)
+    if os.path.isfile(VAL_IMG_NAME):
+        os.remove(VAL_IMG_NAME)
 
 
+def data_eng():
+    del_files()
+    # separate IMG_FOLDER images between train and test .csv
+    create_train_test(IMG_FOLDER)
 
-# deleting files from previous executions
-if os.path.isfile(TEST_FEATURES_FILE):
-    os.remove(TEST_FEATURES_FILE)
-if os.path.isfile(TRAIN_FEATURES_FILE):
-    os.remove(TRAIN_FEATURES_FILE)
-if os.path.exists(TEST_PATH):
-    shutil.rmtree(TEST_PATH)
-if os.path.exists(TRAIN_PATH):
-    shutil.rmtree(TRAIN_PATH)
-if os.path.isfile(TEST_NAMES):
-    os.remove(TEST_NAMES)
-if os.path.isfile(TRAIN_NAMES):
-    os.remove(TRAIN_NAMES)
-# separate IMG_FOLDER images between train and test .csv
-create_train_test(IMG_FOLDER)
+    # extract features and create folders with test and train images
+    split_data()
 
-# extract features and create folders with test and train images
-split_data()
+    create_validation_set()
+
+
